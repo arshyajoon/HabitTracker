@@ -30,29 +30,40 @@ class Activities: ObservableObject {
             UserDefaults.standard.set(encoded, forKey: "Activities")
         }
     }
+    
+   
 }
-
 struct ContentView: View {
    @ObservedObject var activities = Activities()
     @State private var showingSheet = false
+    func delete(at offsets: IndexSet) {
+        activities.activity.remove(atOffsets: offsets)
+}
     var body: some View {
         NavigationView {
-        List(activities.activity, id: \.id) { activity in
-            NavigationLink(destination: DetailView(activity: activity)) {
-                Text(activity.title)
+            List {
+                ForEach(activities.activity, id: \.id) { activity in
+                NavigationLink(destination: DetailView(activity: activity)) {
+                    Text(activity.title)
+                }
+                
+                
             }
+                .onDelete(perform: { indexSet in
+                    delete(at: indexSet)
+                    
+                })
+            }
+            .sheet(isPresented: $showingSheet) {
+                FormView(activities: activities)
+            }
+            .navigationBarItems(leading:  Button(action: {
+                self.showingSheet = true
+            }){
+                Image(systemName: "plus")
+            }, trailing: EditButton())
+                .navigationBarTitle("Activities")
             
-            
-        }
-        .sheet(isPresented: $showingSheet) {
-            FormView(activities: activities)
-        }
-        .navigationBarItems(leading:  Button(action: {
-            self.showingSheet = true
-        }){
-            Image(systemName: "plus")
-        })
-        .navigationBarTitle("Activities")
     }
 }
 }
@@ -63,6 +74,6 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 //1. add edit button to content view
-//2. create and call a function that deletes rows in our list 
+//2. create and call a function that deletes rows in our list
 
 
